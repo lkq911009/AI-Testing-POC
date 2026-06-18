@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Office temporary/lock files
+~$*
+*.tmp
+
+# Common noise
+Thumbs.db
