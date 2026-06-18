@@ -1,0 +1,4 @@
+tc_id,req_ids,evidence_ids,feature,risk_level,test_type,layer,precondition,test_data,steps,expected_result,oracle_type,system_refs,design_technique,automation_hint,executability,confidence,review_status,open_questions
+{{PROJECT}}-TC-001,{{PROJECT}}-REQ-001,{{PROJECT}}-E-001,功能点,P0,正向/边界,L1,前置条件,,规则测试点步骤,可追溯到证据的预期意图,边界,,边界值,,需输入,高,Confirmed,
+QME-TC-012,QME-REQ-008,QME-E-011,加价竞买报价,P0,正向/边界,L1,加价竞买场次已开始,初始价=100;最小加价幅度=5,竞买方按整倍数加价回应,以初始价为起点按最小加价幅度整倍数加价回应（规则级，不可判定）,规则,,边界值,适合报价校验自动化,需输入,高,Confirmed,
+QME-TC-012-L2,QME-REQ-008,QME-E-011,加价竞买报价,P0,正向/反向/边界,L2,场次已开始;初始价=100;最小加价幅度=5;最大加价幅度=20,报价=105(正);报价=103(反);报价=121(边界),进入报价页面->提交报价->提交数量,105接受;103拒绝并提示须为最小加价幅度整数倍;121拒绝(>初始价+最大幅度),边界,报价表单.初始价/最小加价幅度/最大加价幅度,边界值/错误推测,接口/规则引擎断言,可执行,高,Confirmed,

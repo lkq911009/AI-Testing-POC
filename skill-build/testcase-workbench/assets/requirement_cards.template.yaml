@@ -1,0 +1,29 @@
+# 需求卡模板 — 一卡一规则。前缀 {{PROJECT}}-REQ-。每个字段都要能追溯到 source_ids。
+# confidence: 高/中/低；ambiguity: 缺预期/状态/异常时写在这里，不要臆造。
+
+- req_id: "{{PROJECT}}-REQ-001"
+  source_ids: ["{{PROJECT}}-E-001"]      # 证据 ID，可多个
+  actor: ""                               # 用户/系统/外部机构
+  trigger: ""                             # 触发动作
+  precondition: ""                        # 前置条件
+  rule: ""                                # 业务规则（只写文档明确出现的）
+  input: ""                               # 输入字段/数据
+  output: ""                              # 输出/状态变化/提示
+  exception: ""                           # 异常或失败分支；文档未定义则写"未定义"
+  ambiguity: "无"                         # 歧义点；缺失信息写这里
+  confidence: "中"                        # 高/中/低
+  input_readiness: "partial"              # complete | partial | external-dependency（输入充分性闸门）
+
+# 示例（来自 QME）：
+- req_id: "QME-REQ-008"
+  source_ids: ["QME-E-011"]
+  actor: "竞买方"
+  trigger: "加价竞买回应"
+  precondition: "单向加价竞买场次已开始"
+  rule: "竞买方应以初始价为起点，由低至高按最小加价幅度整倍数加价回应，并按公告约定报出对应数量。"
+  input: "报价、数量"
+  output: "有效回应符合价格步长和公告数量约定"
+  exception: "最大价格/数量约束以公告为准"
+  ambiguity: "不符合步长或公告数量约定的处理方式需系统确认"
+  confidence: "高"
+  input_readiness: "partial"
