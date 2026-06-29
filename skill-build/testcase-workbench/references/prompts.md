@@ -53,15 +53,20 @@ coverage_dimensions、positive/negative/boundary 计划数、status。
 
 分层规则：
 - 默认生成 L1 规则测试点（可追溯、不含系统页面/按钮/接口）。
-- 仅当提供了"系统输入资产"（字段清单/表单模板/页面API地图/取值）时，
+- 仅当提供了"系统输入资产"（字段清单/表单模板/页面API地图/软件页面截图/取值）时，
   才把 L1 注入为 L2 可执行用例，填入具体 steps / test_data / 可判定 expected_result。
+- 若提供软件页面截图，只能用来校准页面入口、按钮/字段名称、可见状态和提示文案；
+  不能只凭截图推导业务规则或 expected_result。
+- L2 steps 必须原子化：每个 step 只包含一个操作，使用 S1/S2/S3 编号；
+  不要用"并且/然后/同时"串联多个动作。
 
 硬性规则：
 1. 每条用例必须引用 req_ids 和 evidence_ids。
 2. expected_result 必须来自 evidence，不能猜测；无证据时 review_status=Needs Confirmation。
-3. 不得写入文档未定义的页面、按钮、接口、字段、金额、费率。
-4. 不要为了数量制造重复用例。
-5. 输出字段：tc_id（前缀 {{PROJECT}}-TC-）、req_ids、evidence_ids、feature、
+3. 不得写入文档、字段清单、页面/API 地图或软件截图都未定义的页面、按钮、接口、字段、金额、费率。
+4. L2 steps 每项一个用户操作、系统操作或 API 调用；观察/等待可作为独立 step，断言写入 expected_result。
+5. 不要为了数量制造重复用例。
+6. 输出字段：tc_id（前缀 {{PROJECT}}-TC-）、req_ids、evidence_ids、feature、
    risk_level、test_type、layer(L1/L2)、precondition、test_data、steps、
    expected_result、oracle_type、system_refs、design_technique、automation_hint、
    executability、confidence、review_status、open_questions。
@@ -80,11 +85,12 @@ coverage_dimensions、positive/negative/boundary 计划数、status。
 
 逐条判断：
 1. expected_result 是否有 evidence 支撑？
-2. steps 是否引入了文档未定义的页面、按钮、接口、字段？
-3. test_data 是否违反字段约束？
-4. 是否与其他用例/需求冲突？
-5. 是否覆盖了对应测试设计技术？
-6. layer 与 executability 是否一致（L2 必须有具体 steps 和可判定 oracle）？
+2. steps 是否引入了文档、字段清单、页面/API 地图或软件截图都未定义的页面、按钮、接口、字段？
+3. L2 每个 step 是否只包含一个操作？是否存在需要拆分的复合 step？
+4. test_data 是否违反字段约束？
+5. 是否与其他用例/需求冲突？
+6. 是否覆盖了对应测试设计技术？
+7. layer 与 executability 是否一致（L2 必须有具体 steps 和可判定 oracle）？
 
 输出：accepted_cases、rejected_cases、needs_confirmation、duplicate_groups、
 coverage_gaps、questions_for_business。

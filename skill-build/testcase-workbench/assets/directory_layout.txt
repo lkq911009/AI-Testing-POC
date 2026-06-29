@@ -1,10 +1,11 @@
 ai-testcase-workbench/            # 每个新项目复制此结构
   sources/                        # 原始输入
-    docs/  api/  code_refs/  defects/
+    docs/  api/  code_refs/  defects/  screenshots/
   system_inputs/                  # 系统输入资产（解锁 L2 可执行用例）
     field_catalog.md              #   字段清单/枚举/约束
     form_or_announcement_template.md
     page_api_map.md               #   页面入口与接口地图
+    ui_screenshot_inventory.md    #   软件页面截图索引/可见控件/提示文案
   parsed/
     evidence_index.jsonl
     source_conflicts.md

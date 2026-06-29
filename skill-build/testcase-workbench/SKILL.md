@@ -1,7 +1,7 @@
 ---
 name: testcase-workbench
 description: >-
-  End-to-end, anti-hallucination workflow for turning project documents (PRD, SRS, 业务规则/业务细则, 接口文档, 用户故事, 验收标准) into traceable, reviewable software test cases. Use this skill whenever the user wants to generate, design, audit, or improve test cases or test scenarios from requirements or specifications — including phrases like 测试用例, 用例生成, 从需求/文档生成用例, test case generation, test design, coverage analysis, or benchmarking AI-generated cases against an existing test library. It runs a staged pipeline (evidence index, requirement cards, coverage model, two-layer cases, validation) with strict traceability, honest two-tier metrics, gold-standard benchmarking, and single-source-of-truth governance. Generic skeleton plus a trading/finance adaptation layer. Prefer this skill over ad-hoc one-shot generation whenever project documents are the input and reviewable, non-hallucinated test cases are the goal.
+  End-to-end, anti-hallucination workflow for turning project documents (PRD, SRS, 业务规则/业务细则, 接口文档, 用户故事, 验收标准) and optional software page screenshots into traceable, reviewable software test cases. Use this skill whenever the user wants to generate, design, audit, or improve test cases or test scenarios from requirements or specifications — including phrases like 测试用例, 用例生成, 从需求/文档生成用例, test case generation, test design, coverage analysis, or benchmarking AI-generated cases against an existing test library. It runs a staged pipeline (evidence index, requirement cards, coverage model, two-layer cases, validation) with strict traceability, honest two-tier metrics, gold-standard benchmarking, and single-source-of-truth governance. Generic skeleton plus a trading/finance adaptation layer. Prefer this skill over ad-hoc one-shot generation whenever project documents are the input and reviewable, non-hallucinated test cases are the goal.
 license: For internal/team use.
 ---
 
@@ -22,7 +22,7 @@ license: For internal/team use.
 1. **有证据**：每条用例可追溯到至少一个证据 ID（文档条款/页码、代码、或人工确认）。
 2. **可验证**：每条预期结果可判定真假；做不到就别写成确认事实。
 3. **有审查状态**：每条用例标 `Confirmed / Needs Confirmation / Rejected`。
-4. **输入闸门**：系统输入（字段/页面/接口/取值）未到位的需求只产 L1 抽象测试点，不假装可执行（见"两层模型"）。
+4. **输入闸门**：系统输入（字段/页面/接口/取值/软件页面截图）未到位的需求只产 L1 抽象测试点，不假装可执行（见"两层模型"）。
 5. **金标准对标**：有既有用例库时，用 Recall/Novelty/Precision 量化价值，而不是自报"100% 覆盖"。
 6. **单一事实来源**：一个项目一套 ID 前缀、一份权威产物、可复现的 run manifest。
 
@@ -35,7 +35,9 @@ license: For internal/team use.
 | L1 | 规则测试点 | 需求卡 + 证据 | 否 | 稳定、可追溯，覆盖"测什么、预期意图" |
 | L2 | 可执行用例 | L1 + 系统输入资产 | 是 | 含具体步骤/数据/可判定 oracle |
 
-只有当项目方提供**系统输入资产**（字段清单、公告/表单模板、页面与 API 地图、配置与规则参数）时，才把 L1 实例化为 L2。否则停在 L1 并登记"待注入"。详见 `references/pipeline.md`。
+只有当项目方提供**系统输入资产**（字段清单、公告/表单模板、页面与 API 地图、软件页面截图、配置与规则参数）时，才把 L1 实例化为 L2。截图只能校准真实页面、字段、按钮、提示和状态，不能单独推导业务规则或预期结果。否则停在 L1 并登记"待注入"。详见 `references/pipeline.md`。
+
+L2 的 `steps` 必须尽量原子化：每个 step 只描述一个用户操作、系统操作或 API 调用，并使用稳定编号（如 `S1/S2/S3`），避免把"打开页面、填写字段并提交"写成一个复合步骤。
 
 ## 工作流水线（A–G）
 
@@ -44,7 +46,7 @@ license: For internal/team use.
 | A 摄取 | 解析文档，按条/款/字段切分，建证据索引（含哈希、页码、原文） | `evidence_index.jsonl`、`source_conflicts.md` | 证据不可被生成内容回写 |
 | B 需求卡 | 抽原子需求卡（一卡一规则），标歧义 | `requirement_cards.yaml`、`ambiguity_list.md` | **输入充分性闸门**（见下） |
 | C 测试设计 | 为每张卡选测试技术，定风险等级与覆盖维度 | `coverage_model.md`、`risk_matrix.md` | 资金/权限/合规自动升 P0 |
-| D 用例生成 | 先 L1 规则测试点；有系统输入再注入为 L2 | `test_cases_draft.md` | 无证据→Needs Confirmation |
+| D 用例生成 | 先 L1 规则测试点；有系统输入再注入为 L2，L2 steps 一步一操作 | `test_cases_draft.md` | 无证据→Needs Confirmation |
 | E 验证 | 逐条反幻觉、冲突、冗余、漏测、自一致性、CoVe | `validation_report.md`、`gap_report.md` | NC 不进交付集 |
 | F 对标 | 与既有用例库做 Recall/Novelty/Precision | `benchmark/recall_report.md` | 有既有库时必做 |
 | G 交付 | 映射到团队规范列 + 追溯列，单份权威产物 | `approved/test_cases_v1.xlsx`、`run_manifest.jsonl` | 单一事实来源 |
@@ -56,7 +58,7 @@ license: For internal/team use.
 这一节是"通用方案"的可复用入口。新项目按此初始化：
 
 1. **定 ID 命名空间**：选一个项目前缀（如 `ACME`），全程用 `ACME-REQ-*`、`ACME-E-*`、`ACME-TC-*`，禁止并存第二套。
-2. **盘点输入**：按 `references/pipeline.md` 的输入资产表收集文档；标注哪些是"系统输入资产"（决定能否产 L2）。
+2. **盘点输入**：按 `references/pipeline.md` 的输入资产表收集文档，并检查 `sources/screenshots/` 是否有软件页面截图；标注哪些是"系统输入资产"（决定能否产 L2）。
 3. **选风格基准**：找到团队既有用例库的列与写法（house style），作为交付格式与对标金标准。
 4. **建目录**：按 `assets/directory_layout.txt` 建工作区。
 5. **套模板**：从 `assets/` 复制需求卡/覆盖/用例/验证/对标/run manifest 模板。
@@ -82,7 +84,7 @@ license: For internal/team use.
 
 ## 交付物
 
-最终只产**一份权威工作簿**：列采用团队规范（所属模块/功能点/前置/步骤/预期/优先级/案例类型…），末尾追加追溯列（需求 ID / 证据 ID）。配套 `validation_report.md`、`benchmark/recall_report.md`、`governance/run_manifest.jsonl`。历史与中间态进 `generated/` 或 `archive/`，不进 `approved/`。
+最终只产**一份权威工作簿**：列采用团队规范（所属模块/功能点/前置/步骤/预期/优先级/案例类型…），其中 L2 步骤保留编号且一项一个动作，末尾追加追溯列（需求 ID / 证据 ID）。配套 `validation_report.md`、`benchmark/recall_report.md`、`governance/run_manifest.jsonl`。历史与中间态进 `generated/` 或 `archive/`，不进 `approved/`。
 
 ## 常见失败模式（务必规避）
 
@@ -94,4 +96,4 @@ license: For internal/team use.
 4. 大量 Needs Confirmation 计入产物 → 输入闸门 + NC 生命周期。
 5. 多套 ID / 多份重叠产物 → 单一命名空间 + 单一权威产物。
 6. 不符合团队规范、无对标 → house-style 映射 + 金标准对标。
-7. 单一文档输入封顶质量 → 输入资产盘点，缺则只产 L1 并登记待办。
+7. 单一文档输入封顶质量 → 输入资产盘点（含页面截图），缺则只产 L1 并登记待办。
